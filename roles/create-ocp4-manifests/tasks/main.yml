@@ -39,10 +39,10 @@
   - name: Create Append Bootstrap Config
     shell: "export BOOTSTRAP_IGNITION_URL={{bootstrap_iginition_url}}; envsubst < {{playbook_dir}}/roles/create-ocp4-manifests/templates/append-bootstrap.ign.j2 > {{ tmpdir }}/append-bootstrap.ign"
   
-  # - name: Move bootstrap config to the apache serving dir
-  #   copy:
-  #     src: "{{ tmpdir }}/bootstrap.ign"
-  #     dest: "/var/www/html/igniton/bootstrap.ign"
+  - name: Move bootstrap config to the apache serving dir
+    copy:
+      src: "{{ tmpdir }}/bootstrap.ign"
+      dest: "{{ bootstrap_file_destination }}"
 
   - name: Base64 encode the ignition configs
     shell: |
