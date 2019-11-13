@@ -1,0 +1,68 @@
+---
+- block:
+  - include: setup.yml
+  - name: Download the openshift 4 installer
+    unarchive:
+      src: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux-4.2.2.tar.gz
+      dest: "{{ tmpdir }}"
+      remote_src: yes
+  - name: set facts
+    set_fact:
+      ssh_key: "{{ lookup('file', ssh_key_file) }}"
+
+# had to do a cat and stdout due to ansible changing the json quotes in the file
+  - name: read file
+    shell: "cat {{pull_secret_file}}"
+    register: pull_secret
+  - debug: var=pull_secret.stdout
+
+  - name: Create the install-config.yaml
+    template:
+      src: ../templates/install-config.yaml.j2
+      dest: "{{ tmpdir }}/install-config.yaml"
+
+  - name: Backup Config
+    copy:
+      src: "{{ tmpdir }}/install-config.yaml"
+      dest: "{{ tmpdir }}/install-config.yaml.backup"
+
+  - name: Create the Manifests
+    shell: "openshift-install create manifests"
+    args:
+      chdir: "{{ tmpdir }}"
+
+  - name: Create Ignition Configs
+    shell: "openshift-install create ignition-configs"
+    args:
+      chdir: "{{ tmpdir }}"
+
+  - name: Create Append Bootstrap Config
+    shell: "export BOOTSTRAP_IGNITION_URL={{bootstrap_iginition_url}}; envsubst < {{playbook_dir}}/roles/create-ocp4-manifests/templates/append-bootstrap.ign.j2 > {{ tmpdir }}/append-bootstrap.ign"
+  
+  # - name: Move bootstrap config to the apache serving dir
+  #   copy:
+  #     src: "{{ tmpdir }}/bootstrap.ign"
+  #     dest: "/var/www/html/igniton/bootstrap.ign"
+
+  - name: Base64 encode the ignition configs
+    shell: |
+      for i in append-bootstrap master worker
+      do
+      base64 -w0 < $i.ign > $i.64
+      done
+    args:
+      chdir: "{{ tmpdir }}"
+
+  - name: Set facts for the ignition file locations
+    set_fact:
+      master_ignition_64_file: "{{ tmpdir }}/master.64"
+      append_bootstrap_ignition_64_file: "{{ tmpdir }}/append-bootstrap.64"
+      worker_ignition_64_file: "{{ tmpdir }}/worker.64"
+
+  - name: Set facts for the VM Creation
+    set_fact:
+      master_ignition_64: "{{ lookup('file', master_ignition_64_file) }}"
+      append_bootstrap_ignition_64: "{{ lookup('file', append_bootstrap_ignition_64_file) }}"
+      worker_ignition_64: "{{ lookup('file', worker_ignition_64_file) }}"
+      
+

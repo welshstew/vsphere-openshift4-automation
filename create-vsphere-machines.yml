@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/vsphere-temp.yml
+  tasks:
+    - block:
+        - name: Create OCP4 Manifests
+          include_role: name=create-ocp4-manifests
+        - name: Create OCP4 Machines Vsphere
+          include_role: name=create-ocp4-machines-vsphere

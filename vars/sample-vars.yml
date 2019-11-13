@@ -1,0 +1,64 @@
+---
+cluster_id: ocp1
+cluster_domain: example.lab
+ssh_key_file: /home/user/.ssh/id_rsa.pub
+pull_secret_file: /home/user/pull-secret.json
+bootstrap_iginition_url: http://hello.com/ignition/bootstrap.ign
+bootstrap_iginition_destination: 
+folder:
+network: VM Network
+machines:
+- name: bootstrapy
+  host: esxhost1
+  template: worker-bootstrap-template
+  cores: 4
+  ram: 8192
+  datastore: esxhost1-2tb
+  mac: 00:50:56:AA:AA:AA
+  disk: 120G
+  type: bootstrap
+- name: master0y
+  host: esxhost1
+  template: master-template
+  cores: 4
+  ram: 16384
+  datastore: esxhost1-2tb
+  mac: 00:50:56:AA:AA:AB
+  disk: 120G
+  type: master
+- name: master1y
+  host: esxhost1
+  template: master-template
+  cores: 4
+  ram: 16384
+  datastore: esxhost1-2tb
+  mac: 00:50:56:AA:AA:AC
+  disk: 120G
+  type: master
+- name: master2y
+  host: esxhost1
+  template: master-template
+  cores: 4
+  ram: 16384
+  datastore: esxhost1-2tb
+  mac: 00:50:56:AA:AA:AD
+  disk: 120G
+  type: master
+- name: worker0y
+  host: esxhost1
+  template: worker-bootstrap-template
+  cores: 4
+  ram: 8192
+  datastore: esxhost1-2tb
+  mac: 00:50:56:AA:AA:AE
+  disk: 120G
+  type: worker
+- name: worker1y
+  host: esxhost1
+  template: worker-bootstrap-template
+  cores: 4
+  ram: 8192
+  datastore: esxhost1-2tb
+  mac: 00:50:56:AA:AA:AF
+  disk: 120G
+  type: worker

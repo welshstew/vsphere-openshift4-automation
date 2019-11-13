@@ -1,0 +1,3 @@
+govc.env
+pull-secret.json
+vars/vsphere-temp.yml

@@ -1,0 +1,27 @@
+---
+- name: Clone Template
+  shell: govc vm.clone -ds={{item.datastore}} -on=false -c={{item.cores}} -host={{item.host}} -m={{item.ram}} -vm {{item.template}} {{item.name}}
+
+- name: Change VM Network
+  shell: govc vm.network.change -net.address={{item.mac}} -vm={{item.name}} -net="{{network}}" ethernet-0
+
+- name: Change Disk Size 
+  shell: govc vm.disk.change -vm={{item.name}} -size={{item.disk}}
+
+- name: Set Ignition Value master
+  set_fact:
+    ignition_config: "{{ master_ignition_64 }}"
+  when: item.type == "master"
+
+- name: Set Ignition Value worker
+  set_fact:
+    ignition_config: "{{ worker_ignition_64 }}"
+  when: item.type == "worker"
+
+- name: Set Ignition Value bootstrap
+  set_fact:
+    ignition_config: "{{ append_bootstrap_ignition_64 }}"
+  when: item.type == "bootstrap"
+
+- name: Add Ignition data to VM
+  shell: "govc vm.change -vm {{item.name}} -e=guestinfo.ignition.config.data={{ignition_config}}"
