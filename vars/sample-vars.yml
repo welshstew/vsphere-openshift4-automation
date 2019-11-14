@@ -1,10 +1,10 @@
 ---
 cluster_id: ocp1
 cluster_domain: example.lab
-ssh_key_file: /home/user/.ssh/id_rsa.pub
-pull_secret_file: /home/user/pull-secret.json
-bootstrap_iginition_url: http://hello.com/ignition/bootstrap.ign
-bootstrap_file_destination: /var/www/html/igniton/bootstrap.ign
+ssh_key_file: /root/.ssh/id_rsa.pub
+pull_secret_file: /root/pull-secret.json
+ignition_base_url: http://some-accessible-http-site:8080/ignition
+ignition_file_destination: /var/www/html/ignition/
 folder:
 network: VM Network
 machines:

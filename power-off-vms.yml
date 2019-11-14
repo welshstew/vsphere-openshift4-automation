@@ -4,6 +4,6 @@
   vars_files:
     - vars/vsphere-homelab.yml
   tasks:
-    - name: Power On VMS
-      shell: "govc vm.power -on -wait=true {{ item.name }}"
+    - name: Power Off VMS
+      shell: "govc vm.power -off -wait=true {{ item.name }}"
       with_items: "{{ machines }}"

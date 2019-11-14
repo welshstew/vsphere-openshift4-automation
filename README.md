@@ -14,7 +14,21 @@ Instructions followed as per: https://blog.openshift.com/openshift-4-2-vsphere-i
 
 I run this playbook from the same host that has had https://github.com/christianh814/ocp4-upi-helpernode run on it.
 
-Ensure you have `govc` installed. And ensure you have the appropriate GOVC environment variables populated:
+Ensure you have `govc` installed. 
+
+```
+curl -L https://github.com/vmware/govmomi/releases/download/v0.21.0/govc_linux_amd64.gz | gunzip > /usr/local/bin/govc
+chmod +x /usr/local/bin/govc
+```
+
+Ensure `/usr/local/bin` is on your `$PATH`:
+
+```
+echo "PATH=\$PATH:/usr/local/bin" >> ~/.bashrc
+```
+
+
+And ensure you have the appropriate GOVC environment variables populated:
 
 ```
 export GOVC_USERNAME=administrator@vsphere.local

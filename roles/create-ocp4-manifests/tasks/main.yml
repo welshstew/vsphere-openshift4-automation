@@ -27,26 +27,36 @@
       dest: "{{ tmpdir }}/install-config.yaml.backup"
 
   - name: Create the Manifests
-    shell: "openshift-install create manifests"
+    shell: "{{ tmpdir }}/openshift-install create manifests"
     args:
       chdir: "{{ tmpdir }}"
 
   - name: Create Ignition Configs
-    shell: "openshift-install create ignition-configs"
+    shell: "{{ tmpdir }}/openshift-install create ignition-configs"
     args:
       chdir: "{{ tmpdir }}"
 
   - name: Create Append Bootstrap Config
-    shell: "export BOOTSTRAP_IGNITION_URL={{bootstrap_iginition_url}}; envsubst < {{playbook_dir}}/roles/create-ocp4-manifests/templates/append-bootstrap.ign.j2 > {{ tmpdir }}/append-bootstrap.ign"
+    shell: "export IGNITION_URL={{ignition_base_url}}/bootstrap.ign; envsubst < {{playbook_dir}}/roles/create-ocp4-manifests/templates/append.ign.j2 > {{ tmpdir }}/append-bootstrap.ign"
   
-  - name: Move bootstrap config to the apache serving dir
-    copy:
-      src: "{{ tmpdir }}/bootstrap.ign"
-      dest: "{{ bootstrap_file_destination }}"
+  - name: Create Append Master Config
+    shell: "export IGNITION_URL={{ignition_base_url}}/master.ign; envsubst < {{playbook_dir}}/roles/create-ocp4-manifests/templates/append.ign.j2 > {{ tmpdir }}/append-master.ign"
+  
+  - name: Create Append Worker Config
+    shell: "export IGNITION_URL={{ignition_base_url}}/worker.ign; envsubst < {{playbook_dir}}/roles/create-ocp4-manifests/templates/append.ign.j2 > {{ tmpdir }}/append-worker.ign"
 
-  - name: Base64 encode the ignition configs
+  - name: Move ignition configs to the apache serving dir
+    copy:
+      src: "{{ tmpdir }}/{{item}}.ign"
+      dest: "{{ ignition_file_destination }}"
+    with_items:
+      - master
+      - bootstrap
+      - worker
+
+  - name: Base64 encode the append ignition configs
     shell: |
-      for i in append-bootstrap master worker
+      for i in append-bootstrap append-master append-worker
       do
       base64 -w0 < $i.ign > $i.64
       done
@@ -55,14 +65,23 @@
 
   - name: Set facts for the ignition file locations
     set_fact:
-      master_ignition_64_file: "{{ tmpdir }}/master.64"
+      append_master_ignition_64_file: "{{ tmpdir }}/append-master.64"
       append_bootstrap_ignition_64_file: "{{ tmpdir }}/append-bootstrap.64"
-      worker_ignition_64_file: "{{ tmpdir }}/worker.64"
+      append_worker_ignition_64_file: "{{ tmpdir }}/append-worker.64"
 
   - name: Set facts for the VM Creation
     set_fact:
-      master_ignition_64: "{{ lookup('file', master_ignition_64_file) }}"
+      append_master_ignition_64: "{{ lookup('file', append_master_ignition_64_file) }}"
       append_bootstrap_ignition_64: "{{ lookup('file', append_bootstrap_ignition_64_file) }}"
-      worker_ignition_64: "{{ lookup('file', worker_ignition_64_file) }}"
-      
+      append_worker_ignition_64: "{{ lookup('file', append_worker_ignition_64_file) }}"
+
+  - name: Copy the kubeconfig to local kube folder
+    copy:
+      src: "{{tmpdir}}/auth/kubeconfig"
+      dest: "~/.kube/config"
+
+  - name: Copy kubeadmin-password to home directory
+    copy:
+      src: "{{tmpdir}}/auth/kubeadmin-password"
+      dest: "~/.kubeadmin-password"
 

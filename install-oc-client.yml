@@ -1,0 +1,22 @@
+---
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/vsphere-homelab.yml
+  tasks:
+    - block:
+      - name: Create temporary directory
+        tempfile:
+          state: directory
+        register: _tmpdir
+      - set_fact:
+          tmpdir: "{{ _tmpdir.path }}"
+      - name: Download the openshift 4 client 
+        unarchive:
+          src: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux-4.2.2.tar.gz
+          dest: "{{ tmpdir }}"
+          remote_src: yes
+      - name: Move oc client to /usr/local/bin
+        shell: "mv {{ tmpdir }}/oc /usr/local/bin/oc"
+      - name: Move kubectl client to /usr/local/bin
+        shell: "mv {{ tmpdir }}/kubectl /usr/local/bin/kubectl"

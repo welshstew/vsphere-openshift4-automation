@@ -2,7 +2,7 @@
 - hosts: localhost
   connection: local
   vars_files:
-    - vars/vsphere-temp.yml
+    - vars/vsphere-homelab.yml
   tasks:
     - block:
         - name: Create OCP4 Manifests

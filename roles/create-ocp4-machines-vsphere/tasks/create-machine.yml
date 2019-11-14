@@ -10,12 +10,12 @@
 
 - name: Set Ignition Value master
   set_fact:
-    ignition_config: "{{ master_ignition_64 }}"
+    ignition_config: "{{ append_master_ignition_64 }}"
   when: item.type == "master"
 
 - name: Set Ignition Value worker
   set_fact:
-    ignition_config: "{{ worker_ignition_64 }}"
+    ignition_config: "{{ append_worker_ignition_64 }}"
   when: item.type == "worker"
 
 - name: Set Ignition Value bootstrap

@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/vsphere-homelab.yml
+  tasks:
+    - block:
+      - name: Teardown VMs
+        pause: prompt='Please confirm you want to teardown! Press return to continue. Press Ctrl+c and then "a" to abort'
+      - name: Delete VMs
+        shell: "govc vm.destroy {{ item.name }}"
+        with_items: "{{ machines }}"
