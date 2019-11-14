@@ -5,8 +5,9 @@ VERY BASIC playbook using `openshift-install` and `govc` to create an openshift 
 - Downloads Installer
 - Generates Manifests
 - Generates Ignition Configs
+- Places the ignition configs in a local apache directory (for the VMs to fetch later)
 - Creates VMs (prereq: template must exist in the cluster)
-- Modifies VMs to add ignition configs to them
+- Modifies VMs to add "append" ignition configs to them - to tell the VMs to get the config from the http server
 
 Instructions followed as per: https://blog.openshift.com/openshift-4-2-vsphere-install-quickstart/
 
@@ -25,6 +26,7 @@ Ensure `/usr/local/bin` is on your `$PATH`:
 
 ```
 echo "PATH=\$PATH:/usr/local/bin" >> ~/.bashrc
+source ~/.bashrc
 ```
 
 
@@ -36,7 +38,7 @@ export GOVC_PASSWORD=password
 export GOVC_URL=my.vcenter.lan
 export GOVC_INSECURE=true
 ```
-Ensure you have a `vars/vsphere-temp.yml` file populated as you want.
+Ensure you have the appropriate vars file populated as per the playbook.
 
 Run the playbook with:
 
@@ -60,10 +62,10 @@ In this case everything will be in `/tmp/ansible.s4i72i7g`
 ---
 cluster_id: ocp1
 cluster_domain: example.lab
-ssh_key_file: /home/user/.ssh/id_rsa.pub
-pull_secret_file: /home/user/pull-secret.json
-bootstrap_iginition_url: http://hello.com/ignition/bootstrap.ign
-bootstrap_iginition_destination: 
+ssh_key_file: /root/.ssh/id_rsa.pub
+pull_secret_file: /root/pull-secret.json
+ignition_base_url: http://some-accessible-http-site:8080/ignition
+ignition_file_destination: /var/www/html/ignition/
 folder:
 network: VM Network
 machines:
