@@ -60,6 +60,8 @@ In this case everything will be in `/tmp/ansible.s4i72i7g`
 
 ```
 ---
+openshift_installer_url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux-4.2.4.tar.gz
+openshift_client_url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux-4.2.4.tar.gz
 cluster_id: ocp1
 cluster_domain: example.lab
 ssh_key_file: /root/.ssh/id_rsa.pub

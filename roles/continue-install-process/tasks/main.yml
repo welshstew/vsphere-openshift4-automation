@@ -1,0 +1,34 @@
+---
+- block:
+    - name: Prompt to power on VMs
+      pause: prompt='Please confirm you want to power on the VMs and continue the install process. Press return to continue. Press Ctrl+c and then "a" to abort:' 
+    - name: Power On VMs
+      shell: "govc vm.power -on -wait=true {{ item.name }}"
+      with_items: "{{ machines }}"
+    - name: Wait until bootstrap process is complete
+      shell: "{{ tmpdir }}/openshift-install wait-for bootstrap-complete --log-level debug"
+      args:
+        chdir: "{{ tmpdir }}"
+    - name: Approve all certificate signing requests
+      shell: "oc get csr --no-headers | awk '{print $1}' | xargs oc adm certificate approve"
+
+    - name: Get Image Registry Cluster Operator (Wait For it....!)
+      shell: "oc get co/image-registry -o name"
+      ignore_errors: yes
+      retries: 15
+      delay: 60
+      register: result
+      until: result.rc == 0
+    
+    - name: Cat patch file
+      shell: "cat {{playbook_dir}}/roles/continue-install-process/files/patch-emptydir.json"
+      register: cat_out
+
+      #oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+    - name: Patch registry storage as emptyDir
+      shell: "oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{{cat_out.stdout}}'"
+    
+    - name: Wait for install process to Finalize
+      shell: "openshift-install wait-for install-complete"
+      args:
+        chdir: "{{ tmpdir }}"

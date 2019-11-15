@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: registry-pv
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteMany
+  iscsi:
+     targetPortal: {{registrypv.targetPortal}}
+     iqn: {{registrypv.iqn}}
+     lun: {{registrypv.lun}}
+     fsType: 'ext4'

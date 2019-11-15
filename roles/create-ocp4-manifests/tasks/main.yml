@@ -3,7 +3,7 @@
   - include: setup.yml
   - name: Download the openshift 4 installer
     unarchive:
-      src: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux-4.2.2.tar.gz
+      src: "{{openshift_installer_url}}"
       dest: "{{ tmpdir }}"
       remote_src: yes
   - name: set facts

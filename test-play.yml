@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/vsphere-homelab.yml
+  tasks:
+    - name: Get Image Registry
+      shell: "oc get co/image-registry -o name"
+      ignore_errors: yes
+      retries: 15
+      delay: 60
+      register: result
+      until: result.rc == 0
+
+    - name: Hello
+      debug:
+        var: result
+        
