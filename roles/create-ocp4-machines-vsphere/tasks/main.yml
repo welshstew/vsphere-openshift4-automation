@@ -1,23 +1,5 @@
 ---
 # tasks file for create-ocp4-machines-vsphere
-# - name: Loop machines
-#   debug: 
-#     var: "{{ item }}"
-#   with_items: "{{ machines }}"
-
 - block:
-    # - include: config-gitlab-check-permissions.yml
-    # - include: config-gitlab-collate-uris.yml
-    # - debug: var=git_uris
     - include: create-machine.yml
       with_items: "{{ machines }}"
-
-# - block:
-#     include: 
-#   - name: Show name 1
-#     debug:
-#       var: "{{ item }}"
-#   - name: Show name 2
-#     debug:
-#       var: "{{ item }}"
-#   with_items: "{{ machines }}"

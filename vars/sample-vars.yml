@@ -1,66 +1,77 @@
 ---
-openshift_installer_url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux-4.2.4.tar.gz
-openshift_client_url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux-4.2.4.tar.gz
+openshift_installer_url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.2.13/openshift-install-linux-4.2.13.tar.gz
+openshift_client_url: https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.2.13/openshift-client-linux-4.2.13.tar.gz
 cluster_id: ocp1
 cluster_domain: example.lab
 ssh_key_file: /root/.ssh/id_rsa.pub
-pull_secret_file: /root/pull-secret.json
-ignition_base_url: http://some-accessible-http-site:8080/ignition
+pull_secret_file: /root/pull-secret-2.json
+ignition_base_url: http://192.168.2.22:8080/ignition
 ignition_file_destination: /var/www/html/ignition/
 folder:
 network: VM Network
+vsphere:
+  vcenter: vcenter.lan
+  username: administrator@vsphere.local
+  password: password
+  datacenter: Datacenter
+  defaultDataStore: som3datastore
+nfs:
+  ip: 192.168.2.5
+  directory: /var/nfsshare
+disconnected:
+  mirror: NAS25C3F7:6088/ocp4
 machines:
-- name: bootstrapy
-  host: esxhost1
+- name: bootstrap
+  host: 192.168.2.2
   template: worker-bootstrap-template
   cores: 4
   ram: 8192
-  datastore: esxhost1-2tb
-  mac: 00:50:56:AA:AA:AA
+  datastore: esx1-2tb-ssd
+  mac: 00:50:56:9E:47:BD
   disk: 120G
   type: bootstrap
-- name: master0y
-  host: esxhost1
+- name: master0
+  host: 192.168.2.2
   template: master-template
   cores: 4
   ram: 16384
-  datastore: esxhost1-2tb
-  mac: 00:50:56:AA:AA:AB
+  datastore: esx1-1tb-m2ssd
+  mac: 00:50:56:9E:CF:7D
   disk: 120G
   type: master
-- name: master1y
-  host: esxhost1
+- name: master1
+  host: 192.168.2.2
   template: master-template
   cores: 4
   ram: 16384
-  datastore: esxhost1-2tb
-  mac: 00:50:56:AA:AA:AC
+  datastore: esx1-2tb-ssd
+  mac: 00:50:56:9E:D1:6B
   disk: 120G
   type: master
-- name: master2y
-  host: esxhost1
+- name: master2
+  host: 192.168.2.3
   template: master-template
   cores: 4
   ram: 16384
-  datastore: esxhost1-2tb
-  mac: 00:50:56:AA:AA:AD
+  datastore: esx2-500gb-m2ssd
+  mac: 00:50:56:9E:AC:29
   disk: 120G
   type: master
-- name: worker0y
-  host: esxhost1
+- name: worker0
+  host: 192.168.2.3
   template: worker-bootstrap-template
   cores: 4
-  ram: 8192
-  datastore: esxhost1-2tb
-  mac: 00:50:56:AA:AA:AE
+  ram: 16384
+  datastore: esx2-500gb-m2ssd
+  mac: 00:50:56:9E:45:F9
   disk: 120G
   type: worker
-- name: worker1y
-  host: esxhost1
+- name: worker1
+  host: 192.168.2.3
   template: worker-bootstrap-template
   cores: 4
-  ram: 8192
-  datastore: esxhost1-2tb
-  mac: 00:50:56:AA:AA:AF
+  ram: 16384
+  datastore: esx2-2tb-ssd
+  mac: 00:50:56:9E:1F:CB
   disk: 120G
   type: worker

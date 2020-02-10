@@ -32,3 +32,55 @@
       shell: "openshift-install wait-for install-complete"
       args:
         chdir: "{{ tmpdir }}"
+
+    # remove and delete bootstrap machine here.
+    - name: Power Off and Delete Bootstrap VM
+      shell: "govc vm.power -off -wait=true bootstrap && govc vm.destroy bootstrap"
+
+    - name: Apply the Credentials Manager
+      shell: "oc create -f {{playbook_dir}}/roles/continue-install-process/files/kubelet-bootstrap-cred-manager-ds.yaml"
+
+    - name: Delete the Signer secrets
+      shell: "oc delete secrets/csr-signer-signer secrets/csr-signer -n openshift-kube-controller-manager-operator"
+
+    - name: Wait 5 minutes cluster operators to be all good
+      pause:
+        minutes: 5
+
+    - name: Wait until all cluster operators are Available
+      shell: oc get co --no-headers | awk '{ print $3 }' | uniq
+      register: waiting_for_available
+      until: waiting_for_available.stdout == 'True'
+      retries: 10
+      delay: 60
+
+    - name: Wait until none of the cluster operators are Progressing
+      shell: oc get co --no-headers | awk '{ print $4 }' | uniq
+      register: waiting_for_progressing
+      until: waiting_for_progressing.stdout == 'False'
+      retries: 10
+      delay: 60    
+
+    # monitoring components workaround
+    - name: Get Config Map Definition
+      shell: "oc get configmap extension-apiserver-authentication -n kube-system -o yaml > {{ tmpdir }}/extension-apiserver-authentication.yaml"
+
+    - name: Add an empty line to config map file
+      lineinfile:
+        path: "{{ tmpdir }}/extension-apiserver-authentication.yaml"
+        insertafter: '-----END CERTIFICATE-----'
+        line: ''
+
+    - name: Update Config Map with new file
+      shell: "oc replace -f  {{ tmpdir }}/extension-apiserver-authentication.yaml"
+
+    - name: Wait until none of the cluster operators are Progressing
+      shell: oc get co --no-headers | awk '{ print $4 }' | uniq
+      register: waiting_for_progressing
+      until: waiting_for_progressing.stdout == 'False'
+      retries: 10
+      delay: 60 
+
+    - name: Now Complete
+      debug:
+        msg: You should now be able to gracefully shutdown the VMs and recover the cluster using the power-on-and-recover.yml playbook

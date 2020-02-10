@@ -1,0 +1,6 @@
+OCP_RELEASE: 4.3.1
+LOCAL_REGISTRY: some-registry:1234
+LOCAL_REPOSITORY: ocp4
+PRODUCT_REPOSITORY: openshift-release-dev
+LOCAL_SECRET_JSON: /root/pull-secret-2.json
+RELEASE_NAME: ocp-release

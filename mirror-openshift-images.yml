@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/mirror-images.yml
+  vars:
+    release_image: "quay.io/openshift-release-dev/ocp-release@sha256:ea7ac3ad42169b39fce07e5e53403a028644810bee9a212e7456074894df40f3"
+  tasks:
+    - name: Mirror Images
+      shell: "oc adm release mirror -a {{LOCAL_SECRET_JSON}} --from={{release_image}} --to-release-image={{LOCAL_REGISTRY}}/{{LOCAL_REPOSITORY}}:{{OCP_RELEASE}} --to={{LOCAL_REGISTRY}}/{{LOCAL_REPOSITORY}}"

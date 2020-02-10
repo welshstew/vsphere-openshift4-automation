@@ -5,5 +5,10 @@
     - vars/vsphere-homelab.yml
   tasks:
     - name: Power Off VMS
-      shell: "govc vm.power -off -wait=true {{ item.name }}"
-      with_items: "{{ machines }}"
+      shell: "govc vm.power -s=true -wait=true {{ item }}"
+      with_items:
+      - master0
+      - master1
+      - master2
+      - worker0
+      - worker1

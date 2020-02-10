@@ -1,0 +1,30 @@
+---
+- block:
+    - name: Create NFS PVC
+      shell: "oc create -f {{playbook_dir}}/roles/create-registry-nfs-storage/files/nfs-registry-pvc.yaml"
+
+    - name: Cat patch registry storage file
+      shell: "cat {{playbook_dir}}/roles/create-registry-nfs-storage/files/patch-storage.json"
+      register: cat_storage_out
+    - name: Patch registry storage as PVC
+      shell: "oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{{cat_storage_out.stdout}}'"
+
+    - name: Cat patch remove emtyDir
+      shell: "cat {{playbook_dir}}/roles/create-registry-nfs-storage/files/patch-remove-emptydir.json"
+      register: cat_emptydir_out
+
+    - name: Patch registry managementstate
+      shell: "oc patch configs.imageregistry.operator.openshift.io cluster --type json --patch '{{cat_emptydir_out.stdout}}'"
+
+    - name: Cat patch registry managementstate
+      shell: "cat {{playbook_dir}}/roles/create-registry-nfs-storage/files/patch-managementstate.json"
+      register: cat_management_out
+    - name: Patch registry managementstate
+      shell: "oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{{cat_management_out.stdout}}'"
+
+    - name: Wait until none of the cluster operators are Progressing
+      shell: oc get co --no-headers | awk '{ print $4 }' | uniq
+      register: waiting_for_progressing
+      until: waiting_for_progressing.stdout == 'False'
+      retries: 10
+      delay: 60    

@@ -26,3 +26,12 @@ platform:
     defaultDatastore: {{ vsphere.defaultDataStore }}
 pullSecret: '{{ pull_secret.stdout }}'
 sshKey: '{{ ssh_key }}'
+additionalTrustBundle: |
+{{ disconnected.additionalTrustBundle | indent(4,True) }}
+imageContentSources:
+- mirrors:
+  - {{disconnected.mirror}}
+  source: quay.io/openshift-release-dev/ocp-release
+- mirrors:
+  - {{disconnected.mirror}}
+  source: quay.io/openshift-release-dev/ocp-v4.0-art-dev

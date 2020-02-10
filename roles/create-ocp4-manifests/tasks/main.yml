@@ -16,10 +16,17 @@
     register: pull_secret
   - debug: var=pull_secret.stdout
 
+  - name: Create the disconnected install-config.yaml
+    template:
+      src: ../templates/install-config-disconnected.yaml.j2
+      dest: "{{ tmpdir }}/install-config.yaml"
+    when: disconnected.mirror is defined
+
   - name: Create the install-config.yaml
     template:
       src: ../templates/install-config.yaml.j2
       dest: "{{ tmpdir }}/install-config.yaml"
+    when: disconnected.mirror is not defined
 
   - name: Backup Config
     copy:

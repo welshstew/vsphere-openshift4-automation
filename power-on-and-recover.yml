@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/vsphere-homelab.yml
+  tasks:
+    - name: Power On VMS
+      shell: "govc vm.power -on -wait=true {{ item.name }}"
+      with_items: "{{ machines }}"
+      ignore_errors: true
+
+    - name: Wait 5 minutes for Nodes to settle and pods to start
+      pause:
+        minutes: 5
+      
+    - name: Approve all certificate signing requests
+      shell: "oc get csr --no-headers | awk '{print $1}' | xargs oc adm certificate approve"
+
+    

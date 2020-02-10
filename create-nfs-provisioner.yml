@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/vsphere-homelab.yml
+  tasks:
+    - block:
+        - name: Create NFS Provisioner
+          include_role: name=create-dynamic-nfs-provisioner

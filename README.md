@@ -51,7 +51,7 @@ Please note that everything happens in a temp directory:
 ```
 TASK [create-ocp4-manifests : Create temporary directory] **********************************************************************************************************
 task path: /some/path/vsphere-openshift4-automation/roles/create-ocp4-manifests/tasks/setup.yml:2
-changed: [localhost] => {"changed": true, "gid": 1000, "group": "swinches", "mode": "0700", "owner": "user", "path": "/tmp/ansible.s4i72i7g", "secontext": "unconfined_u:object_r:user_tmp_t:s0", "size": 40, "state": "directory", "uid": 1000}
+changed: [localhost] => {"changed": true, "gid": 1000, "group": "hello", "mode": "0700", "owner": "user", "path": "/tmp/ansible.s4i72i7g", "secontext": "unconfined_u:object_r:user_tmp_t:s0", "size": 40, "state": "directory", "uid": 1000}
 ```
 
 In this case everything will be in `/tmp/ansible.s4i72i7g`
