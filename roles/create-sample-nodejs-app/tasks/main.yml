@@ -1,0 +1,29 @@
+---
+- block:
+    - include: setup.yml
+    - name: Create nodejs project
+      shell: "oc new-project {{samples.nodejs.project}}"
+
+    - name: Get samples registry credenitals
+      shell: "oc get secret samples-registry-credentials -n openshift -o jsonpath='{.data.\\.dockerconfigjson}' | base64 -d > {{ tmpdir }}/samples-registry-credentials.json"
+
+    - name: Add samples registry credenitals to nodejs project
+      shell: "oc create secret generic samples-registry-credentials --from-file=.dockerconfigjson={{ tmpdir }}/samples-registry-credentials.json --type=kubernetes.io/dockerconfigjson -n {{samples.nodejs.project}}"
+
+    - name: Add secret to builder service account
+      shell: "oc secrets link builder samples-registry-credentials -n {{samples.nodejs.project}}"
+
+    - name: Create app from template
+      shell: "oc new-app --template={{samples.nodejs.template_name}} -n {{samples.nodejs.project}}"    
+
+    - name: Ensure we are able to access the application via the exposed route
+      uri:
+        url: "http://nodejs-mongo-persistent-{{ samples.nodejs.project }}.apps.{{ cluster_id }}.{{ cluster_domain }}/"
+        follow_redirects: none
+        method: GET
+      register: _result
+      until: _result.status == 200
+      retries: 720 
+      delay: 5 # Every 5 seconds
+
+    - include: cleanup.yml

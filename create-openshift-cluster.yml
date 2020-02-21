@@ -1,0 +1,19 @@
+---
+- hosts: localhost
+  connection: local
+  vars_files:
+    - vars/vsphere-homelab.yml
+  tasks:
+    - block:
+        - name: Create OCP4 Manifests
+          include_role: name=create-ocp4-manifests
+        - name: Create OCP4 Machines Vsphere
+          include_role: name=create-ocp4-machines-vsphere
+        - name: Continue Openshift Install
+          include_role: name=continue-install-process
+        - name: Create Dynamic NFS Provisioning
+          include_role: name=create-dynamic-nfs-provisioner
+        - name: Create Registry NFS Storage
+          include_role: name=create-registry-nfs-storage
+        - name: Create Sample persistent App
+          include_role: name=create-sample-app

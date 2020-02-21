@@ -27,20 +27,27 @@
       delay: 60
       register: result
       until: result.rc == 0
+# TODO: FIX THIS
+
 
     - name: Create test PV claim
       shell: "oc create -f {{playbook_dir}}/roles/create-dynamic-nfs-provisioner/files/nfs-test-claim.yaml -n default"
 
+    - name: Create the NFS test client pod
+      template:
+        src: ../templates/nfs-test-pod.yaml.j2
+        dest: "{{ tmpdir }}/nfs-test-pod.yaml"
+
     - name: Create test pod
-      shell: "oc create -f {{playbook_dir}}/roles/create-dynamic-nfs-provisioner/files/nfs-test-pod.yaml -n default"
+      shell: "oc create -f {{ tmpdir }}/nfs-test-pod.yaml -n default"
 
     - name: Ensure test pod has suceeded
-      shell: "oc get pods --field-selector \"status.phase=Succeeded\" -n default -l apstorage.test.type=nfs -o name"
+      shell: "oc get pods --field-selector \"status.phase=Succeeded\" -n default -l storage.test.type=nfs -o name"
       ignore_errors: yes
       retries: 5
       delay: 60
       register: result
-      until: result.rc == 0
+      until: result.stdout == "pod/test-pod"
 
     - include: cleanup.yml
 

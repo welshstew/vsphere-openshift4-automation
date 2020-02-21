@@ -1,0 +1,8 @@
+---
+- block:
+    - name: Create htpasswd secret
+      shell: "oc create secret generic htpass-secret --from-file=htpasswd={{playbook_dir}}/roles/create-htpasswd-auth/files/users.htpasswd -n openshift-config"
+    - name: Create OAuth CR
+      shell: "oc apply -f {{playbook_dir}}/roles/create-htpasswd-auth/files/htpasswd-cr.yml"
+    - name: Add admin to cluster-admin role
+      shell: "oc adm policy add-cluster-role-to-user cluster-admin admin"
