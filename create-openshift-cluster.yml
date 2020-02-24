@@ -15,5 +15,7 @@
           include_role: name=create-dynamic-nfs-provisioner
         - name: Create Registry NFS Storage
           include_role: name=create-registry-nfs-storage
-        - name: Create Sample persistent App
-          include_role: name=create-sample-app
+        - name: Create Sample nodejs app
+          include_role: name=create-sample-nodejs-app
+        - name: Create Sample springboot app
+          include_role: name=create-sample-springboot-app
