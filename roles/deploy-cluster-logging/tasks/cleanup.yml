@@ -1,0 +1,5 @@
+---
+- name: Clean temporary files
+  file:
+    state: absent
+    path: "{{ tmpdir }}"

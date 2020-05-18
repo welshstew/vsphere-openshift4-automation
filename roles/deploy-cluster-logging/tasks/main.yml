@@ -1,0 +1,43 @@
+---
+- block:
+    - include: setup.yml
+
+    - name: Create Logging project
+      shell: "oc create -f {{playbook_dir}}/roles/deploy-cluster-logging/files/eo-namespace.yml"
+
+    - name: Create Operator Group
+      shell: "oc create -f {{playbook_dir}}/roles/deploy-cluster-logging/files/eo-og.yml"
+
+    - name: Create Operator Subscription
+      shell: "oc create -f {{playbook_dir}}/roles/deploy-cluster-logging/files/eo-sub.yml"
+
+    - name: Create Operator RBAC
+      shell: "oc create -f {{playbook_dir}}/roles/deploy-cluster-logging/files/eo-rbac.yml"
+
+    - name: Wait for Operator to be Installed
+      pause: prompt='Please confirm operator is installed, then press return to continue. Press Ctrl+c and then "a" to abort:' 
+  
+    - name: Create Logging Operator NS
+      shell: "oc create -f {{playbook_dir}}/roles/deploy-cluster-logging/files/clo-namespace.yml"
+
+    - name: Create Logging Operator Group
+      shell: "oc create -f {{playbook_dir}}/roles/deploy-cluster-logging/files/clo-og.yml"
+
+    - name: Create Logging Operator Subscription
+      shell: "oc create -f {{playbook_dir}}/roles/deploy-cluster-logging/files/clo-sub.yml"
+
+    - name: Create Cluster Logging Instance
+      shell: "oc create -f {{playbook_dir}}/roles/deploy-cluster-logging/files/clo-instance.yml"
+
+    - name: Wait 1 min for logging instance to come up to build etc
+      pause:
+        minutes: 1
+
+    # - name: Wait for app to be running
+    #   shell: "oc get pods -l app=s2i-fuse74-spring-boot-camel -n {{ samples.springboot.project }} --field-selector \"status.phase=Running\" -o name"
+    #   register: podname
+    #   until: podname.stdout_lines|length == 1
+    #   retries: 10
+    #   delay: 60
+      
+    - include: cleanup.yml
