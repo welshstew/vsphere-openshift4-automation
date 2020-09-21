@@ -4,15 +4,6 @@
     - name: Create springboot project
       shell: "oc new-project {{ samples.springboot.project }}"
 
-    - name: Get samples registry credenitals
-      shell: "oc get secret samples-registry-credentials -n openshift -o jsonpath='{.data.\\.dockerconfigjson}' | base64 -d > {{ tmpdir }}/samples-registry-credentials.json"
-
-    - name: Add samples registry credenitals to springboot project
-      shell: "oc create secret generic samples-registry-credentials --from-file=.dockerconfigjson={{ tmpdir }}/samples-registry-credentials.json --type=kubernetes.io/dockerconfigjson -n {{ samples.springboot.project }}"
-
-    - name: Add secret to builder service account
-      shell: "oc secrets link builder samples-registry-credentials -n {{ samples.springboot.project }}"
-
     - name: Create camel app template
       shell: "oc create -f {{ samples.springboot.template_url }} -n {{ samples.springboot.project }}"    
 

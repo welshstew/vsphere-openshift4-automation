@@ -1,6 +1,6 @@
 ---
 - name: Clone Template
-  shell: govc vm.clone -ds={{item.datastore}} -on=false -c={{item.cores}} -host={{item.host}} -m={{item.ram}} -vm {{item.template}} {{item.name}}
+  shell: govc vm.clone -ds={{item.datastore}} -on=false -c={{item.cores}} -host={{item.host}} -folder={{cluster_id}} -m={{item.ram}} -vm {{item.template}} {{item.name}}
 
 - name: Change VM Network
   shell: govc vm.network.change -net.address={{item.mac}} -vm={{item.name}} -net="{{network}}" ethernet-0

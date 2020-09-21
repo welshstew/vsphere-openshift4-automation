@@ -24,5 +24,6 @@ platform:
     password: {{ vsphere.password }}
     datacenter: {{ vsphere.datacenter }}
     defaultDatastore: {{ vsphere.defaultDataStore }}
+    folder: /{{ vsphere.datacenter }}/vm/{{ vsphere.folder }}
 pullSecret: '{{ pull_secret.stdout }}'
 sshKey: '{{ ssh_key }}'

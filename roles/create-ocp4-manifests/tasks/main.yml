@@ -38,6 +38,11 @@
     args:
       chdir: "{{ tmpdir }}"
 
+  - name: Remove the Kubernetes manifest files that define the control plane machines and compute machineSets
+    shell: "rm -f {{ tmpdir }}/openshift/99_openshift-cluster-api_master-machines-*.yaml {{ tmpdir }}/openshift/99_openshift-cluster-api_worker-machineset-*.yaml"
+    args:
+      chdir: "{{ tmpdir }}"
+
   - name: Create Ignition Configs
     shell: "{{ tmpdir }}/openshift-install create ignition-configs"
     args:

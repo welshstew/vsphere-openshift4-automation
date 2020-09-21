@@ -1,0 +1,7 @@
+---
+- name: Create temporary directory
+  tempfile:
+    state: directory
+  register: _tmpdir
+- set_fact:
+    tmpdir: "{{ _tmpdir.path }}"

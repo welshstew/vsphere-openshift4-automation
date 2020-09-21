@@ -1,0 +1,38 @@
+---
+- block:
+    - include: setup.yml
+
+    - name: Get API Endpoint domain name
+      shell: "oc whoami --show-server | cut -f 2 -d ':' | cut -f 3 -d '/' | sed 's/-api././'"
+      register: apiendpoint
+
+    - name: Get API Wildcard domain 
+      shell: "oc get ingresscontroller default -n openshift-ingress-operator -o jsonpath='{.status.domain}'"
+      register: wildcardendpoint
+
+    - name: Run acme.sh
+      shell: "${HOME}/acme.sh/acme.sh --issue -d {{apiendpoint.stdout}} -d *.{{wildcardendpoint.stdout}} --dns dns_aws"
+
+    - name: Copy to certificates dir
+      shell: "${HOME}/acme.sh/acme.sh --install-cert -d ${LE_API} -d *.${LE_WILDCARD} --cert-file $HOME/certificates/cert.pem --key-file $HOME/certificates/privkey.pem --fullchain-file $HOME/certificates/fullchain.pem --ca-file $HOME/certificates/ca.cer"
+
+    - name: Install certs on Ingress Controllers
+      shell: "oc create secret tls ingress-certs --cert=$HOME/certificates/fullchain.pem --key=$HOME/certificates/privkey.pem -n openshift-ingress"
+
+    - name: Cat patch ingress file
+      shell: "cat {{playbook_dir}}/roles/apply-letsencrypt-certificates/files/patch-ingress.json"
+      register: cat_ingress
+
+    - name: Patch IngressControllers
+      shell: "oc patch ingresscontroller default -n openshift-ingress-operator --type=merge --patch='{{cat_ingress.stdout}}'"
+
+    - name: Install certs for API
+      shell: "oc create secret tls api-certs --cert=$HOME/certificates/fullchain.pem --key=$HOME/certificates/privkey.pem -n openshift-config"
+
+    - name: Create the API Patch
+      template:
+        src: ../templates/patch-api.json.j2
+        dest: "{{ tmpdir }}/patch-api.json"
+
+    - name: Patch API
+      shell: "oc patch apiserver cluster --type=merge --patch={{ tmpdir }}/patch-api.json"

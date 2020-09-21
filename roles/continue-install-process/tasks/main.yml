@@ -5,15 +5,25 @@
     - name: Power On VMs
       shell: "govc vm.power -on -wait=true {{ item.name }}"
       with_items: "{{ machines }}"
+
     - name: Wait until bootstrap process is complete
       shell: "{{ tmpdir }}/openshift-install wait-for bootstrap-complete --log-level debug"
       args:
         chdir: "{{ tmpdir }}"
-    - name: Approve all certificate signing requests
-      shell: "oc get csr --no-headers | awk '{print $1}' | xargs oc adm certificate approve"
+
+    - name: Approve all certificate signing requests!
+      shell: "for i in {1..5}; do oc get csr -A -o name | xargs oc adm certificate approve; sleep 30; done"
+
+    - name: Wait 5 minutes cluster operators to be all good
+      pause:
+        minutes: 5
+
+    - name: Approve all certificate signing requests again!
+      shell: "for i in {1..10}; do oc get csr -A -o name | xargs oc adm certificate approve; sleep 30; done"
+
 
     - name: Get Image Registry Cluster Operator (Wait For it....!)
-      shell: "oc get co/image-registry -o name"
+      shell: "oc get csr -A -o name | xargs oc adm certificate approve > /dev/null && oc get co/image-registry -o name"
       ignore_errors: yes
       retries: 15
       delay: 60
@@ -44,19 +54,19 @@
     # - name: Delete the Signer secrets
     #   shell: "oc delete secrets/csr-signer-signer secrets/csr-signer -n openshift-kube-controller-manager-operator"
 
-    - name: Wait 5 minutes cluster operators to be all good
+    - name: Wait 15 minutes cluster operators to be all good
       pause:
-        minutes: 5
+        minutes: 15
 
     - name: Wait until all cluster operators are Available
-      shell: oc get co --no-headers | awk '{ print $3 }' | uniq
+      shell: "oc get csr -A -o name | xargs oc adm certificate approve > /dev/null && oc get co --no-headers | awk '{ print $3 }' | uniq"
       register: waiting_for_available
       until: waiting_for_available.stdout == 'True'
       retries: 10
       delay: 60
 
     - name: Wait until none of the cluster operators are Progressing
-      shell: oc get co --no-headers | awk '{ print $4 }' | uniq
+      shell: "oc get csr -A -o name | xargs oc adm certificate approve > /dev/null && oc get co --no-headers | awk '{ print $4 }' | uniq"
       register: waiting_for_progressing
       until: waiting_for_progressing.stdout == 'False'
       retries: 10
@@ -75,12 +85,6 @@
     # - name: Update Config Map with new file
     #   shell: "oc replace -f  {{ tmpdir }}/extension-apiserver-authentication.yaml"
 
-    - name: Wait until none of the cluster operators are Progressing
-      shell: oc get co --no-headers | awk '{ print $4 }' | uniq
-      register: waiting_for_progressing
-      until: waiting_for_progressing.stdout == 'False'
-      retries: 10
-      delay: 60 
 
     - name: Now Complete
       debug:
